@@ -1,13 +1,12 @@
 package main
 
 import (
-	"go_web/src/main/web"
+	"go_web/src/main/form"
 	"net/http"
 )
 
 func main() {
-	//http.HandleFunc("/", web.MyHandler)
-	//http.ListenAndServe(":8080", nil)
-	mux := &web.MyMux{}
-	http.ListenAndServe(":8080", mux)
+	http.HandleFunc("/", form.ParamHandler)
+	http.HandleFunc("/login", form.RequestMethodHandler)
+	http.ListenAndServe(":80", nil)
 }
