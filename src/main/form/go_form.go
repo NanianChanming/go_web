@@ -1,8 +1,8 @@
 package form
 
 import (
+	"bytes"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"strings"
 )
@@ -37,8 +37,16 @@ func RequestMethodHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func RequestParamBody(w http.ResponseWriter, r *http.Request) {
-	all, _ := ioutil.ReadAll(r.Body)
+	// 第一种方式
+	/*all, _ := ioutil.ReadAll(r.Body)
 	s := string(all)
-	fmt.Println(s)
-	fmt.Fprintln(w, s)
+	fmt.Println(s)*/
+
+	//第二种方式
+	//r.body 只能读取一次
+	b := new(bytes.Buffer)
+	b.ReadFrom(r.Body)
+	fmt.Println(b.String())
+
+	fmt.Fprintln(w, b.String())
 }
