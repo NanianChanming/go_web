@@ -2,6 +2,7 @@ package form
 
 import (
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"strings"
 )
@@ -33,4 +34,11 @@ func RequestMethodHandler(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintln(w, "welcome ", userName)
 		return
 	}
+}
+
+func RequestParamBody(w http.ResponseWriter, r *http.Request) {
+	all, _ := ioutil.ReadAll(r.Body)
+	s := string(all)
+	fmt.Println(s)
+	fmt.Fprintln(w, s)
 }
