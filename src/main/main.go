@@ -6,6 +6,8 @@ import (
 )
 
 func main() {
-	http.HandleFunc("/", web.MyHandler)
-	http.ListenAndServe(":8080", nil)
+	//http.HandleFunc("/", web.MyHandler)
+	//http.ListenAndServe(":8080", nil)
+	mux := &web.MyMux{}
+	http.ListenAndServe(":8080", mux)
 }
