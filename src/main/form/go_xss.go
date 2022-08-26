@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"html"
 	"net/http"
+	"text/template"
 )
 
 /**
@@ -31,4 +32,15 @@ func Escape1(w http.ResponseWriter, r *http.Request) {
 	username = html.EscapeString(username)
 	fmt.Println("escape username = ", username)
 	fmt.Fprintln(w, username)
+}
+
+// Escape2
+/**
+go的html.template包默认过滤了html标签，
+但是有时候想要输出这个 <script>alert()</script> 看起来正常的信息，
+这时候应该使用text/template
+*/
+func Escape2(w http.ResponseWriter, r *http.Request) {
+	parse, _ := template.New("tmp").Parse(`{{define "T"}}Hello, {{.}}!{{end}}`)
+	parse.ExecuteTemplate(w, "T", "<script>alert('you have been pwned')</script>")
 }
