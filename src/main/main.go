@@ -6,8 +6,6 @@ import (
 )
 
 func main() {
-	http.HandleFunc("/", form.ParamHandler)
-	http.HandleFunc("/login", form.RequestMethodHandler)
-	http.HandleFunc("/body", form.RequestParamBody)
+	http.HandleFunc("/", form.Escape1)
 	http.ListenAndServe(":80", nil)
 }
