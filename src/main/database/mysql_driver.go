@@ -8,16 +8,16 @@ import (
 )
 
 func SqlConnect(w http.ResponseWriter, r *http.Request) {
-	db, err := sql.Open("mysql", "root:1234567890@/mdm_data_20220921")
+	db, err := sql.Open("mysql", "root:password@tcp(ip:3306)/xxx?charset=utf8mb4")
 	checkErr(err)
-	rows, err := db.Query("select user_code, user_name from mdm_user limit 1")
+	rows, err := db.Query("select id, username from t_user")
 	checkErr(err)
 	for rows.Next() {
-		var user_code string
-		var user_name string
-		err := rows.Scan(&user_code, &user_name)
+		var id int
+		var username string
+		err := rows.Scan(&id, &username)
 		checkErr(err)
-		fmt.Println(user_code + "--" + user_name)
+		fmt.Printf("%d -- %s", id, username)
 	}
 }
 
