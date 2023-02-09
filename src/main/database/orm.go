@@ -25,19 +25,23 @@ func GoOrm(w http.ResponseWriter, r *http.Request) {
 	ormer := orm.NewOrm()
 	// 插入数据
 	user := model.User{Id: 1, UserCode: "YL0000000001", UserName: "zhangsansan"}
-	//insert, _ := ormer.Insert(&user)
-	//fmt.Printf("UserCode: %d \n", insert)
+	insert, _ := ormer.Insert(&user)
+	fmt.Printf("UserCode: %d \n", insert)
 
 	// 更新数据
-	user.UserName = "lisisi"
-	num, _ := ormer.Update(&user)
-	fmt.Printf("num: %d", num)
+	//user.UserName = "lisisi"
+	//num, _ := ormer.Update(&user)
+	//fmt.Printf("num: %d", num)
 
-	// 查询数据
+	// 查询数据-1 数据读取后赋值给传入user对象
 	err := ormer.Read(&user)
 	fmt.Printf("err: %v \n", err)
 
+	// 查询数据-2 返回一个query_setter
+	seter := ormer.QueryTable(user)
+	seter.Filter("id", 1)
+
 	// 删除数据
-	i, _ := ormer.Delete(&user)
-	fmt.Printf("num: %d", i)
+	//i, _ := ormer.Delete(&user)
+	//fmt.Printf("num: %d", i)
 }
