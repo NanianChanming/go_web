@@ -1,11 +1,21 @@
 package main
 
 import (
-	"go_web/src/main/form"
+	_ "go_web/src/main/web"
 	"net/http"
 )
 
 func main() {
-	http.HandleFunc("/", form.Escape1)
-	http.ListenAndServe(":80", nil)
+	//http.HandleFunc("/socket", web.WebSocketHandle)
+	http.ListenAndServe(":8080", nil)
 }
+
+//var Route map[string]interface{}
+//
+//func init() {
+//	Route["/generateJson"] = text.GenerateJson
+//}
+//
+//func getRoute(url string) interface{} {
+//	return Route[url]
+//}
