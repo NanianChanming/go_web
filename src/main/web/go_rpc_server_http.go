@@ -65,5 +65,6 @@ func (t *Arith) Divide(args *Args, quo *Quotient) error {
 //	arith := new(Arith)
 //	rpc.Register(arith)
 //	rpc.HandleHTTP()
+//	http.ListenAndServe(":8080", nil)
 //	log.Println("--http rpc 服务注册结束--")
 //}

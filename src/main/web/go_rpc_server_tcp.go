@@ -34,9 +34,9 @@ func (t *Arith2) Divide(args *Args, quo *Quotient) error {
 func init() {
 	arith2 := new(Arith2)
 	rpc.Register(arith2)
-	log.Println("--tcp rpc 服务注册结束--")
+	log.Println("--tcp rpc 服务注册--")
 
-	tcpAddr, err := net.ResolveTCPAddr("tcp", ":8081")
+	tcpAddr, err := net.ResolveTCPAddr("tcp", ":8090")
 	if err != nil {
 		fmt.Println("Fatal error ", err.Error())
 		return
