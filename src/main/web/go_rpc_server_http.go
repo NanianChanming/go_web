@@ -2,8 +2,6 @@ package web
 
 import (
 	"errors"
-	"log"
-	"net/rpc"
 )
 
 /*
@@ -63,9 +61,9 @@ func (t *Arith) Divide(args *Args, quo *Quotient) error {
 /*
 通过init函数注册一个Arith的RPC服务，然后通过rpc.HandleHTTP函数把该服务注册到了HTTP协议上，然后我们就可以利用http的方式来传递数据了
 */
-func init() {
-	arith := new(Arith)
-	rpc.Register(arith)
-	rpc.HandleHTTP()
-	log.Println("--rpc服务注册结束--")
-}
+//func init() {
+//	arith := new(Arith)
+//	rpc.Register(arith)
+//	rpc.HandleHTTP()
+//	log.Println("--http rpc 服务注册结束--")
+//}
