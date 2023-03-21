@@ -2,7 +2,6 @@ package web
 
 import (
 	"errors"
-	"fmt"
 	"log"
 	"net"
 	"net/rpc"
@@ -31,7 +30,7 @@ func (t *Arith2) Divide(args *Args, quo *Quotient) error {
 	return nil
 }
 
-func init() {
+/*func init() {
 	arith2 := new(Arith2)
 	rpc.Register(arith2)
 	log.Println("--tcp rpc 服务注册--")
@@ -54,7 +53,7 @@ func init() {
 		//go tcpRPCServer(conn)
 		tcpRPCServer(conn)
 	}
-}
+}*/
 
 func tcpRPCServer(conn net.Conn) {
 	rpc.ServeConn(conn)

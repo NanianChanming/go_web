@@ -2,11 +2,6 @@ package web
 
 import (
 	"errors"
-	"fmt"
-	"log"
-	"net"
-	"net/rpc"
-	"net/rpc/jsonrpc"
 )
 
 /*
@@ -30,7 +25,7 @@ func (t *Arith3) Divide(args *Args, quo *Quotient) error {
 	return nil
 }
 
-func init() {
+/*func init() {
 	arith3 := new(Arith3)
 	rpc.Register(arith3)
 	log.Println("--json rpc 服务注册--")
@@ -53,4 +48,4 @@ func init() {
 		}
 		jsonrpc.ServeConn(conn)
 	}
-}
+}*/
