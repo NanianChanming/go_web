@@ -9,8 +9,15 @@ require (
 
 require (
 	github.com/bitly/go-simplejson v0.5.0 // indirect
+	github.com/cihub/seelog v0.0.0-20170130134532-f561c5e57575 // indirect
 	github.com/gomodule/redigo v1.8.9 // indirect
 	github.com/gorilla/websocket v1.5.0 // indirect
+	github.com/jinzhu/inflection v1.0.0 // indirect
+	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/lib/pq v1.10.7 // indirect
 	github.com/mattn/go-sqlite3 v1.14.16 // indirect
+	github.com/sirupsen/logrus v1.9.0 // indirect
+	golang.org/x/sys v0.6.0 // indirect
+	gorm.io/driver/mysql v1.4.7 // indirect
+	gorm.io/gorm v1.24.6 // indirect
 )
