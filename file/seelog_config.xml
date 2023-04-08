@@ -1,21 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <seelog minlevel="debug" maxlevel="error">
     <outputs formatid="common">
-        <filter levels="critical">
-            <file path="/data/logs/critical.log" formatid="critical"/>
-            <smtp formatid="criticalemail" senderaddress="astaxie@gmail.com" sendername="ShortUrl API"
-                  hostname="smtp.gmail.com" hostport="587" username="mailusername" password="mailpassword">
-                <recipient address="xiemengjun@gmail.com"/>
-            </smtp>
-        </filter>
-        <filter levels="info">
-            <rollingfile type="size" filename="data/logs/info.log" maxsize="100000" maxrolls="5"/>
+        <console formatid="console"/>
+        <rollingfile formatid="common" type="date" filename="data/logs/roll.log" datepattern="20060102" maxrolls="100" fullname="true"/>
+        <filter levels="error">
+            <file formatid="common" path="data/logs/error/error.log"/>
         </filter>
     </outputs>
     <formats>
-        <format id="common" format="%Date/%Time [%LEV] %Msg%n"/>
-        <format id="critical" format="%File %FullPath %Func %Msg%n"/>
-        <format id="criticalemail"
-                format="Critical error on our server!\n    %Time %Date %RelFile %Func %Msg \nSent by Seelog"/>
+        <format id="common" format="%Date %Time [%LEVEL] %File:%Line %FuncShort %Msg%n"/>
+        <format id="console"  format="%EscM(46)%Date %Time %Level%EscM(49) %File:%Line %FuncShort %Msg%n%EscM(0)"/>
     </formats>
 </seelog>

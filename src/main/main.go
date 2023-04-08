@@ -1,11 +1,14 @@
 package main
 
 import (
-	_ "go_web/src/main/web"
+	_ "go_web/src/main/deploy"
+	_ "go_web/src/main/go_gorm"
+	"go_web/src/main/text"
 	"net/http"
 )
 
 func main() {
+	http.HandleFunc("/parseExcel", text.ParseExcel)
 	//http.HandleFunc("/socket", web.WebSocketHandle)
 	http.ListenAndServe(":8080", nil)
 }

@@ -2,19 +2,19 @@ package text
 
 import (
 	"fmt"
+	log "github.com/cihub/seelog"
 	"github.com/xuri/excelize/v2"
-	"go_web/src/main/deploy"
 	"net/http"
 	"strings"
 )
 
 func init() {
-	deploy.Logger.Info("-- excel parse load --")
+	log.Info("-- excel parse load --")
 }
 
 func ParseExcel(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "GET" {
-		deploy.Logger.Error("不支持的请求方式")
+		log.Error("不支持的请求方式")
 		fmt.Fprintln(w, "method not support")
 	}
 	r.ParseForm()
@@ -25,7 +25,7 @@ func ParseExcel(w http.ResponseWriter, r *http.Request) {
 	}
 	defer func() {
 		if err = file.Close(); err != nil {
-			deploy.Logger.Error("文件关闭失败")
+			log.Error("文件关闭失败")
 		}
 	}()
 	list := file.GetSheetList()

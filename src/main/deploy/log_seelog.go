@@ -1,12 +1,5 @@
 package deploy
 
-import (
-	"fmt"
-	log "github.com/cihub/seelog"
-	"net/http"
-	"os"
-)
-
 /*
 seelog是用Go语言实现的一个日志系统，它提供了一些简单的函数来实现复杂的日志分配、过滤和格式化，
 主要有如下特性
@@ -21,7 +14,7 @@ seelog是用Go语言实现的一个日志系统，它提供了一些简单的函
 go get -u github.com/cihub/seelog
 */
 
-var Logger log.LoggerInterface
+/*var Logger log.LoggerInterface
 
 func init() {
 	seelogDemo()
@@ -62,7 +55,7 @@ func DisableLog() {
 
 func UseLogger(newLogger log.LoggerInterface) {
 	Logger = newLogger
-}
+}*/
 
 /*
 上面主要实现了三个函数
@@ -84,9 +77,9 @@ UseLogger
 SeeLogDemo
 定义日志处理包之后，下面是使用示例
 */
-func SeeLogDemo(w http.ResponseWriter, r *http.Request) {
+/*func SeeLogDemo(w http.ResponseWriter, r *http.Request) {
 	defer func() {
 		log.Flush()
 	}()
 	Logger.Info("start log")
-}
+}*/
