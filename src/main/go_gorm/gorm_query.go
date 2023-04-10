@@ -13,6 +13,7 @@ func init() {
 	http.HandleFunc("/queryUserCode", queryUserCode)
 	http.HandleFunc("/subQuery", subQuery)
 	http.HandleFunc("/fromSbuQuery", fromSbuQuery)
+	http.HandleFunc("/groupCondition", groupCondition)
 }
 
 /*
@@ -81,4 +82,20 @@ func fromSbuQuery(w http.ResponseWriter, r *http.Request) {
 	var userCodes []model.UserCode
 	GormDB.Table("(?) as c", subQuery).Find(&userCodes)
 	log.Info(userCodes)
+}
+
+/*
+Group 条件
+非sql中group关键字，是gorm中查询条件分组
+使用Group条件可以很轻松的编写复杂sql
+*/
+func groupCondition(w http.ResponseWriter, r *http.Request) {
+	defer log.Flush()
+	var users []model.MdmUser
+	GormDB.Table("mdm_user").Where(
+		GormDB.Where(GormDB.Where("user_name = ?", "周曼雪").Or("user_code = ?", "YL063851")),
+	).Or(
+		GormDB.Where("user_name = ? or user_code = ?", "容杰", "YL063848").Or("user_name = ?", "徐英瀚"),
+	).Find(&users)
+	log.Info(users)
 }
