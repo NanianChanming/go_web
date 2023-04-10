@@ -14,6 +14,7 @@ func init() {
 	http.HandleFunc("/subQuery", subQuery)
 	http.HandleFunc("/fromSbuQuery", fromSbuQuery)
 	http.HandleFunc("/groupCondition", groupCondition)
+	http.HandleFunc("/inColumns", inColumns)
 }
 
 /*
@@ -97,5 +98,16 @@ func groupCondition(w http.ResponseWriter, r *http.Request) {
 	).Or(
 		GormDB.Where("user_name = ? or user_code = ?", "容杰", "YL063848").Or("user_name = ?", "徐英瀚"),
 	).Find(&users)
+	log.Info(users)
+}
+
+/*
+带有多个列的in查询
+可以使用二维数组
+*/
+func inColumns(w http.ResponseWriter, r *http.Request) {
+	defer log.Flush()
+	var users []model.MdmUser
+	GormDB.Table("mdm_user").Where("(user_name, user_code) in ?", [][]interface{}{{"周曼雪", "YL063851"}, {"徐英瀚", "YL063849"}}).Find(&users)
 	log.Info(users)
 }
