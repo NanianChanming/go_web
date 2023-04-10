@@ -1,6 +1,8 @@
 package go_gorm
 
 import (
+	"encoding/json"
+	"fmt"
 	log "github.com/cihub/seelog"
 	"go_web/src/main/model"
 	"net/http"
@@ -38,8 +40,10 @@ gorm允许通过Select方法选择特定字段，如果经常使用此功能，�
 */
 func queryUserCode(w http.ResponseWriter, r *http.Request) {
 	defer log.Flush()
-	user := model.MdmUser{}
-	GormDB.Model(&user).Limit(10).Find(&model.UserCode{})
-	// todo 读取结果
-	log.Info(user)
+	var user model.MdmUser
+	var codes []model.UserCode
+	GormDB.Model(&user).Limit(10).Find(&codes)
+	log.Info(codes)
+	bytes, _ := json.Marshal(codes)
+	fmt.Fprintf(w, string(bytes))
 }
