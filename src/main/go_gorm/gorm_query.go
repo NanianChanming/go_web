@@ -11,6 +11,8 @@ import (
 func init() {
 	http.HandleFunc("/queryOneUser", queryOneUser)
 	http.HandleFunc("/queryUserCode", queryUserCode)
+	http.HandleFunc("/subQuery", subQuery)
+	http.HandleFunc("/fromSbuQuery", fromSbuQuery)
 }
 
 /*
@@ -46,4 +48,37 @@ func queryUserCode(w http.ResponseWriter, r *http.Request) {
 	log.Info(codes)
 	bytes, _ := json.Marshal(codes)
 	fmt.Fprintf(w, string(bytes))
+}
+
+/*
+子查询
+子查询可以嵌套在查询中，gorm允许在使用 *gorm.DB对象 作为参数时生成子查询
+*/
+func subQuery(w http.ResponseWriter, r *http.Request) {
+	defer log.Flush()
+	var user = model.MdmUser{}
+	GormDB.Where("user_code = (?)", GormDB.Table("mdm_user").Select("user_code").Where("user_id = ?", "USER649641597029322752")).Find(&user)
+	bytes, _ := json.Marshal(user)
+	log.Info(string(bytes))
+
+	subQuery := GormDB.Table("mdm_user").Select("user_code").Where("user_id = ?", "USER1463160424244613120")
+	GormDB.Select("*").Where("user_code = (?)", subQuery).Find(&user)
+	bytes, _ = json.Marshal(user)
+	log.Info(string(bytes))
+}
+
+/*
+from 子查询
+gorm允许在table方法中通过from子句使用子查询
+*/
+func fromSbuQuery(w http.ResponseWriter, r *http.Request) {
+	defer log.Flush()
+	var users []model.MdmUser
+	var codes = []string{"YL900098", "YL063851"}
+	GormDB.Table("(?) as u", GormDB.Model(&users).Select("user_name, user_code").Where("user_code in (?)", codes)).Find(&users)
+
+	subQuery := GormDB.Model(&users).Select("user_code").Where("user_code in (?)", codes)
+	var userCodes []model.UserCode
+	GormDB.Table("(?) as c", subQuery).Find(&userCodes)
+	log.Info(userCodes)
 }
