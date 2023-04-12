@@ -17,6 +17,7 @@ func init() {
 	http.HandleFunc("/groupCondition", groupCondition)
 	http.HandleFunc("/inColumns", inColumns)
 	http.HandleFunc("/nameArgs", nameArgs)
+	http.HandleFunc("/findToMap", findToMap)
 }
 
 /*
@@ -126,4 +127,14 @@ func nameArgs(w http.ResponseWriter, r *http.Request) {
 
 	GormDB.Where("user_code = @code or user_name = @name", map[string]interface{}{"code": "YL063850", "name": "徐英瀚"}).Find(&user)
 	log.Info(user)
+}
+
+/*
+gorm 允许扫描结果至map[string]interface{}或[]map[string]interface{}, 此时别忘了指定Model或Table
+*/
+func findToMap(w http.ResponseWriter, r *http.Request) {
+	defer log.Flush()
+	result := map[string]interface{}{}
+	GormDB.Model(&model.MdmUser{}).First(&result, "user_code = ?", "YL063850")
+	log.Info(result)
 }
