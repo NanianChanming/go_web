@@ -1,6 +1,7 @@
 package go_gorm
 
 import (
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	log "github.com/cihub/seelog"
@@ -15,6 +16,7 @@ func init() {
 	http.HandleFunc("/fromSbuQuery", fromSbuQuery)
 	http.HandleFunc("/groupCondition", groupCondition)
 	http.HandleFunc("/inColumns", inColumns)
+	http.HandleFunc("/nameArgs", nameArgs)
 }
 
 /*
@@ -110,4 +112,18 @@ func inColumns(w http.ResponseWriter, r *http.Request) {
 	var users []model.MdmUser
 	GormDB.Table("mdm_user").Where("(user_name, user_code) in ?", [][]interface{}{{"周曼雪", "YL063851"}, {"徐英瀚", "YL063849"}}).Find(&users)
 	log.Info(users)
+}
+
+/*
+命名参数
+GORM支持sql.NameArg和map[string]interface{}{}形式的命名参数，例如
+*/
+func nameArgs(w http.ResponseWriter, r *http.Request) {
+	defer log.Flush()
+	var user []model.MdmUser
+	GormDB.Where("user_code = @code or user_name = @name", sql.Named("code", "YL900098"), sql.Named("name", "周曼雪")).Find(&user)
+	log.Info(user)
+
+	GormDB.Where("user_code = @code or user_name = @name", map[string]interface{}{"code": "YL063850", "name": "徐英瀚"}).Find(&user)
+	log.Info(user)
 }
