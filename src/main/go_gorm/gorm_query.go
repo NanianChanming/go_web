@@ -18,6 +18,7 @@ func init() {
 	http.HandleFunc("/inColumns", inColumns)
 	http.HandleFunc("/nameArgs", nameArgs)
 	http.HandleFunc("/findToMap", findToMap)
+	http.HandleFunc("/firstOrInit", firstOrInit)
 }
 
 /*
@@ -137,4 +138,30 @@ func findToMap(w http.ResponseWriter, r *http.Request) {
 	result := map[string]interface{}{}
 	GormDB.Model(&model.MdmUser{}).First(&result, "user_code = ?", "YL063850")
 	log.Info(result)
+}
+
+/*
+获取第一条匹配的记录或者根据给定的条件初始化一个实例
+仅支持struct和map条件
+*/
+func firstOrInit(w http.ResponseWriter, r *http.Request) {
+	defer log.Flush()
+	var user model.MdmUser
+	//GormDB.FirstOrInit(&user, model.MdmUser{UserName: "Default", UserCode: "Default"})
+	//log.Info(user)
+
+	//GormDB.Where("user_code = ?", "YL063850").FirstOrInit(&user)
+	//log.Info(user)
+
+	GormDB.FirstOrInit(&user, map[string]interface{}{"user_name": "Default", "user_code": "Default"})
+	log.Info(user)
+
+	// 如果没有找到记录，可以使用包含更多属性的结构体初始化，Attrs不会被用于生成查询sql
+	GormDB.Where("user_code = ?", "YLjalkgja").Attrs(model.MdmUser{UserCode: "YL900098", UserName: "华硕（ASUS）DUAL GeForce RTX4070"}).FirstOrInit(&user)
+	log.Info(user)
+
+	// 不管是否找到记录，Assign都会将属性赋值给struct，但这些属性不会被用于生成查询sql，也不会被保存到数据库
+	GormDB.Where("user_code = ?", "YL900098").Assign("user_code", "华硕（ASUS）DUAL GeForce RTX4070").FirstOrInit(&user)
+	log.Info(user)
+
 }
