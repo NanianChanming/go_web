@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	log "github.com/cihub/seelog"
+	"go_web/src/main/constants"
 	"go_web/src/main/model"
 	"go_web/src/main/utils"
 	"net/http"
@@ -22,6 +23,8 @@ func init() {
 	http.HandleFunc("/findToMap", findToMap)
 	http.HandleFunc("/firstOrInit", firstOrInit)
 	http.HandleFunc("/firstOrCreate", firstOrCreate)
+	http.HandleFunc("/firstOrCreateAttrs", firstOrCreateAttrs)
+	http.HandleFunc("/firstOrCreateAssign", firstOrCreateAssign)
 }
 
 /*
@@ -182,5 +185,31 @@ func firstOrCreate(w http.ResponseWriter, r *http.Request) {
 		UserName: utils.GenerateName(),
 	})
 	log.Info("affected = ", create.RowsAffected)
+	log.Info(user)
+}
+
+/*
+如果没有找到记录，可以使用包含更多属性的结构体创建记录，Attrs不会被用于生成查询sql
+*/
+func firstOrCreateAttrs(w http.ResponseWriter, r *http.Request) {
+	r.ParseForm()
+	user := model.MdmUser{UserName: utils.GenerateName()}
+	tx := GormDB.Where("user_code = ?", r.Form.Get("user_code")).Attrs(model.MdmUser{
+		UserId:   string(strconv.AppendInt([]byte(constants.UserIdPrefix), utils.NextId(), constants.BaseInt)),
+		UserName: utils.GenerateName()}).FirstOrCreate(&user)
+	log.Info("affected = ", tx.RowsAffected)
+	log.Info(user)
+}
+
+/*
+不管是否找到记录，Assign都会将属性赋值给struct，并将结果写入到数据库
+*/
+func firstOrCreateAssign(w http.ResponseWriter, r *http.Request) {
+	r.ParseForm()
+	user := model.MdmUser{UserId: r.Form.Get("user_id")}
+	tx := GormDB.Where(&user).Assign(model.MdmUser{
+		UserName: utils.GenerateName(),
+	}).FirstOrCreate(&user)
+	log.Info("affected = ", tx.RowsAffected)
 	log.Info(user)
 }

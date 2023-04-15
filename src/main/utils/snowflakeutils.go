@@ -93,6 +93,15 @@ func (w *Worker) GetId() int64 {
 	return ID
 }
 
+func NextId() int64 {
+	worker, err := NextWorker()
+	if err != nil {
+		fmt.Println("Fatal error ", err.Error())
+		return 0
+	}
+	return worker.GetId()
+}
+
 func main() {
 	// 生成节点实例
 	node, err := NewWorker(1)
