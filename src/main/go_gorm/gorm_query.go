@@ -6,7 +6,9 @@ import (
 	"fmt"
 	log "github.com/cihub/seelog"
 	"go_web/src/main/model"
+	"go_web/src/main/utils"
 	"net/http"
+	"strconv"
 )
 
 func init() {
@@ -19,6 +21,7 @@ func init() {
 	http.HandleFunc("/nameArgs", nameArgs)
 	http.HandleFunc("/findToMap", findToMap)
 	http.HandleFunc("/firstOrInit", firstOrInit)
+	http.HandleFunc("/firstOrCreate", firstOrCreate)
 }
 
 /*
@@ -164,4 +167,20 @@ func firstOrInit(w http.ResponseWriter, r *http.Request) {
 	GormDB.Where("user_code = ?", "YL900098").Assign("user_code", "华硕（ASUS）DUAL GeForce RTX4070").FirstOrInit(&user)
 	log.Info(user)
 
+}
+
+/*
+获取匹配的第一条记录或者根据给定条件创建一条新纪录(仅struct，map条件有效), RowsAffected返回创建、更新的记录数
+*/
+func firstOrCreate(w http.ResponseWriter, r *http.Request) {
+	user := model.MdmUser{UserCode: "YL900099"}
+	worker, _ := utils.NextWorker()
+	// firstOrCreate会被拼接入sql条件
+	create := GormDB.Where(&user).FirstOrCreate(&user, model.MdmUser{
+		UserId:   string(strconv.AppendInt([]byte("USER"), worker.GetId(), 10)),
+		UserCode: GetUserCode(),
+		UserName: utils.GenerateName(),
+	})
+	log.Info("affected = ", create.RowsAffected)
+	log.Info(user)
 }

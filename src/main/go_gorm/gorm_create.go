@@ -24,14 +24,14 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 	userId := strconv.AppendInt([]byte("USER"), id, 10)
 	user := model.MdmUser{
 		UserId:   string(userId),
-		UserCode: getUserCode(),
+		UserCode: GetUserCode(),
 		UserName: "张三",
 	}
 	GormDB.Create(&user)
 	fmt.Fprintln(w, user)
 }
 
-func getUserCode() string {
+func GetUserCode() string {
 	m := new(model.UserCode)
 	c := clause.Column{Table: "mdm_user", Name: "user_code"}
 	column := clause.OrderByColumn{Column: c, Desc: true}
