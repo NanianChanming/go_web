@@ -8,6 +8,7 @@ import (
 	"go_web/src/main/constants"
 	"go_web/src/main/model"
 	"go_web/src/main/utils"
+	"gorm.io/hints"
 	"net/http"
 	"strconv"
 )
@@ -25,6 +26,7 @@ func init() {
 	http.HandleFunc("/firstOrCreate", firstOrCreate)
 	http.HandleFunc("/firstOrCreateAttrs", firstOrCreateAttrs)
 	http.HandleFunc("/firstOrCreateAssign", firstOrCreateAssign)
+	http.HandleFunc("/dbIndex", dbIndex)
 }
 
 /*
@@ -212,4 +214,13 @@ func firstOrCreateAssign(w http.ResponseWriter, r *http.Request) {
 	}).FirstOrCreate(&user)
 	log.Info("affected = ", tx.RowsAffected)
 	log.Info(user)
+}
+
+/*
+优化器提示用于控制查询优化器选择某个查询执行计划，GORM通过gorm.io/hints提供支持
+*/
+func dbIndex(w http.ResponseWriter, r *http.Request) {
+	var users []model.MdmUser
+	GormDB.Clauses(hints.New("MAX_EXECUTION_TIME(10000)")).Find(&users)
+	log.Info(users)
 }
