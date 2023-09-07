@@ -30,7 +30,7 @@ func init() {
 }
 
 /*
-Gorm提供了First、Tak、Last方法, 以便从数据库中检索单个对象，当查询数据库时它添加了limit 1条件，
+Gorm提供了First、Take、Last方法, 以便从数据库中检索单个对象，当查询数据库时它添加了limit 1条件，
 且没有找到记录时，它返回ErrRecordNotFound错误
 ·三个方法均可以添加条件
 */
