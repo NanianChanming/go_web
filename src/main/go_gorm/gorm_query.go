@@ -218,9 +218,32 @@ func firstOrCreateAssign(w http.ResponseWriter, r *http.Request) {
 
 /*
 优化器提示用于控制查询优化器选择某个查询执行计划，GORM通过gorm.io/hints提供支持
+索引提示允许传递索引提示到数据库，以防查询计划器出现混乱
 */
 func dbIndex(w http.ResponseWriter, r *http.Request) {
+	// 查询优化器
 	var users []model.MdmUser
 	GormDB.Clauses(hints.New("MAX_EXECUTION_TIME(10000)")).Find(&users)
 	log.Info(users)
+
+	// 索引提示 -> select * from users use index (`idx_user_name`)
+	GormDB.Clauses(hints.UseIndex("idx_user_name")).Find(&users)
+
+	// select * from users force index for join (`idx_user_name`, `idx_user_code`)
+	GormDB.Clauses(hints.ForceIndex("idx_user_name", "idx_user_code").ForJoin()).Find(&users)
+}
+
+/*
+gorm支持通过行进行迭代
+*/
+func iterator(w http.ResponseWriter, r *http.Request) {
+	rows, _ := GormDB.Model(&model.MdmUser{}).Where("user_name = ?", "xx").Rows()
+	defer rows.Close()
+	for rows.Next() {
+		var user model.MdmUser
+		GormDB.ScanRows(rows, &user)
+
+		// 业务代码
+
+	}
 }
