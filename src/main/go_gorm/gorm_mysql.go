@@ -6,6 +6,7 @@ import (
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
+	"gorm.io/gorm/schema"
 	"log"
 	"os"
 	"time"
@@ -22,7 +23,7 @@ gorm 操作数据库
 注意: 想要正确的处理time.Time,需要带上parseTime参数，要支持完整的UTF—8编码，需要将charset=utf8更改为utf8mb4
 */
 func connectMysql() {
-	dsn := "root:1234567890@tcp(127.0.0.1:3306)/mdm_data_1124?charset=utf8mb4&parseTime=True&loc=Local"
+	dsn := "root:1234567890@tcp(127.0.0.1:3306)/mdm_data_20231009?charset=utf8mb4&parseTime=True&loc=Local"
 	//db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	// mysql驱动提供了一些高级配置可以在初始化过程中使用，例如：
 	db, err := gorm.Open(mysql.New(mysql.Config{
@@ -33,6 +34,9 @@ func connectMysql() {
 		DontSupportRenameColumn:   true,  //用‘change’重命名列，MySQL 8之前的数据库和MariaDB不支持重命名列
 		SkipInitializeWithVersion: false, // 根据当前MySQL版本自动配置
 	}), &gorm.Config{
+		NamingStrategy: schema.NamingStrategy{
+			SingularTable: true, // 禁用复数表名
+		},
 		Logger: logger.New(
 			log.New(os.Stdout, "\r\n", log.LstdFlags), // io writer（日志输出的目标，前缀和日志包含的内容——译者注）
 			logger.Config{
