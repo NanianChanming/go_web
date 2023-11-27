@@ -99,3 +99,32 @@ func JSONP() {
 	})
 	router.Run()
 }
+
+type LoginForm struct {
+	User     string `form:"user" binding:"required"`
+	Password string `form:"password" binding:"required"`
+}
+
+/*
+Urlencoded
+Multipart/Urlencoded 绑定
+(请求参数绑定)
+*/
+func Urlencoded() {
+	router := gin.Default()
+	router.POST("/login", func(context *gin.Context) {
+		var form LoginForm
+		// 可以使用显式绑定声明绑定 Multipart form
+		// context.ShouldBindWith(&form, binding.Form)
+		// 或者简单的使用ShouldBind 方法自动绑定
+		// 在这种情况下将选择合适的绑定
+		if context.ShouldBind(&form) == nil {
+			if form.User == "user" && form.Password == "password" {
+				context.JSON(http.StatusOK, gin.H{"msg": "login success"})
+			} else {
+				context.JSON(http.StatusUnauthorized, gin.H{"msg": "login failed"})
+			}
+		}
+	})
+	router.Run()
+}
