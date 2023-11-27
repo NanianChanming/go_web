@@ -84,3 +84,18 @@ func Http2Push() {
 	http2.ConfigureServer(server, nil)
 	server.ListenAndServe()
 }
+
+/*
+JSONP
+使用jsonp向不同域的服务器请求数据，如果查询参数存在回调，则将回调添加到响应体中
+*/
+func JSONP() {
+	router := gin.Default()
+	router.GET("/jsonp", func(context *gin.Context) {
+		data := map[string]interface{}{
+			"foo": "bar",
+		}
+		context.JSONP(http.StatusOK, data)
+	})
+	router.Run()
+}
