@@ -106,11 +106,11 @@ type LoginForm struct {
 }
 
 /*
-Urlencoded
+MultipartUrlencodedFormParams
 Multipart/Urlencoded 绑定
 (请求参数绑定)
 */
-func Urlencoded() {
+func MultipartUrlencodedFormParams() {
 	router := gin.Default()
 	router.POST("/login", func(context *gin.Context) {
 		var form LoginForm
@@ -125,6 +125,24 @@ func Urlencoded() {
 				context.JSON(http.StatusUnauthorized, gin.H{"msg": "login failed"})
 			}
 		}
+	})
+	router.Run()
+}
+
+/*
+MultipartUrlencodedForm
+表单绑定
+*/
+func MultipartUrlencodedForm() {
+	router := gin.Default()
+	router.POST("/form_post", func(context *gin.Context) {
+		message := context.PostForm("message")
+		nick := context.DefaultPostForm("nick", "anonymous")
+		context.JSON(http.StatusOK, gin.H{
+			"msg":     "success",
+			"message": message,
+			"nick":    nick,
+		})
 	})
 	router.Run()
 }
