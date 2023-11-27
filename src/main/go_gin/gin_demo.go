@@ -3,6 +3,7 @@ package go_gin
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/testdata/protoexample"
 	"golang.org/x/net/http2"
 	"html/template"
 	"log"
@@ -183,4 +184,70 @@ func QueryPostForm() {
 		fmt.Printf("id: %s, page: %s, name: %s, message: %s \n", id, page, name, message)
 	})
 	router.Run()
+}
+
+/*
+SecureJson
+使用securejson防止json劫持，如果给定的结构是数组值，则默认预置"while(1),"到响应体
+*/
+func SecureJson() {
+	router := gin.Default()
+	router.GET("/secureJson", func(context *gin.Context) {
+		names := []string{"lena", "austin", "foo"}
+		// 将输出：while(1);["lena", "austin", "foo"]
+		context.SecureJSON(http.StatusOK, names)
+	})
+	router.Run()
+}
+
+/*
+ConfigFile
+xml/json/yaml/protobuf渲染
+*/
+func ConfigFile() {
+	r := gin.Default()
+	// gin.H是map[string]interface{}的一种快捷方式
+	r.GET("/someJson", func(context *gin.Context) {
+		context.JSON(http.StatusOK, gin.H{
+			"message": "hey",
+			"status":  http.StatusOK,
+		})
+	})
+
+	r.GET("/moreJson", func(context *gin.Context) {
+		var msg struct {
+			Name    string `json:"user"`
+			Message string
+			Number  int
+		}
+		msg.Name = "Lena"
+		msg.Message = "hey"
+		msg.Number = 123
+		// 注意msg.Name在json中定义成了user
+		// 将输出：{"user": "Lena"}
+		context.JSON(http.StatusOK, msg)
+	})
+
+	r.GET("someXML", func(context *gin.Context) {
+		context.XML(http.StatusOK, gin.H{"message": "hey xml", "status": http.StatusOK})
+	})
+
+	r.GET("/someYAML", func(context *gin.Context) {
+		context.YAML(http.StatusOK, gin.H{"message": "hey yaml", "status": http.StatusOK})
+	})
+
+	r.GET("/someProtoBuf", func(context *gin.Context) {
+		reps := []int64{int64(1), int64(2)}
+		label := "test"
+		// protoBuf 的具体定义写在testdata/protoexample文件中
+		data := &protoexample.Test{
+			Label: &label,
+			Reps:  reps,
+		}
+		// 请注意，数据在响应中变为二进制数据
+		// 将输出被protoexample.Test protobuf 序列化了的数据
+		context.ProtoBuf(http.StatusOK, data)
+	})
+
+	r.Run()
 }
