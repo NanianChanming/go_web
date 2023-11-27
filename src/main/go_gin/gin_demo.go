@@ -1,6 +1,7 @@
 package go_gin
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/net/http2"
 	"html/template"
@@ -143,6 +144,43 @@ func MultipartUrlencodedForm() {
 			"message": message,
 			"nick":    nick,
 		})
+	})
+	router.Run()
+}
+
+/*
+PureJson
+通常，json使用unicode替换HTML字符，例如<变为\u003c,如果按字面对这些字符进行编码，则可以使用PureJson，go1.6及更低版本无法使用此功能
+*/
+func PureJson() {
+	router := gin.Default()
+	router.GET("/json", func(context *gin.Context) {
+		context.JSON(http.StatusOK, gin.H{
+			"html": "<b>Hello, World!</b>",
+		})
+	})
+	router.GET("/purejson", func(context *gin.Context) {
+		context.PureJSON(http.StatusOK, gin.H{
+			"html": "<b>Hello, World!</b>",
+		})
+	})
+	router.Run()
+}
+
+/*
+QueryPostForm
+POST /post?id=1234&page=1
+HTTP/1.1 Content-Type: application/x-www-form-urlencoded
+*/
+func QueryPostForm() {
+	router := gin.Default()
+	router.POST("/query_post_form", func(context *gin.Context) {
+		id := context.Query("id")
+		page := context.DefaultQuery("page", "0")
+		name := context.PostForm("name")
+		message := context.PostForm("message")
+
+		fmt.Printf("id: %s, page: %s, name: %s, message: %s \n", id, page, name, message)
 	})
 	router.Run()
 }
