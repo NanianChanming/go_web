@@ -251,3 +251,67 @@ func ConfigFile() {
 
 	r.Run()
 }
+
+/*
+UploadFile
+单文件上传
+*/
+func UploadFile() {
+	router := gin.Default()
+	// 为multipart forms 设置较低的内存限制(默认是32MiB)
+	router.MaxMultipartMemory = 8 << 20 // 8MiB
+	router.POST("/uploadFile", func(context *gin.Context) {
+		// 单文件
+		file, _ := context.FormFile("file")
+		log.Println(file.Filename)
+		dst := "./file/" + file.Filename
+		// 上传文件至指定的完整文件路径
+		context.SaveUploadedFile(file, dst)
+		context.JSON(http.StatusOK, gin.H{"status": "success!"})
+	})
+	router.Run()
+}
+
+/*
+BatchUpload
+多文件批量上传
+*/
+func BatchUpload() {
+	router := gin.Default()
+	// 为 multipart forms 设置较低的内存限制 (默认是 32 MiB)
+	router.MaxMultipartMemory = 8 << 20 // 8 MiB
+	router.POST("/batchUpload", func(context *gin.Context) {
+		form, _ := context.MultipartForm()
+		files := form.File["upload[]"]
+		for _, file := range files {
+			log.Println(file.Filename)
+			dst := "./file/" + file.Filename
+			context.SaveUploadedFile(file, dst)
+		}
+		context.JSON(http.StatusOK, gin.H{"status": "success!"})
+	})
+	router.Run()
+}
+
+/*
+Reader
+从reader读取数据
+*/
+func Reader() {
+	router := gin.Default()
+	router.GET("/someDataFromReader", func(context *gin.Context) {
+		resp, err := http.Get("https://img0.baidu.com/it/u=3028168707,3962278789&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=281")
+		if err != nil || resp.StatusCode != http.StatusOK {
+			context.Status(http.StatusServiceUnavailable)
+			return
+		}
+		reader := resp.Body
+		contentLength := resp.ContentLength
+		contentType := resp.Header.Get("Content-Type")
+		extraHeaders := map[string]string{
+			"content-Dispostion": `attachment;filename=gopher.jpg`,
+		}
+		context.DataFromReader(http.StatusOK, contentLength, contentType, reader, extraHeaders)
+	})
+	router.Run()
+}
