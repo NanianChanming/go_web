@@ -356,3 +356,35 @@ func Restarted() {
 	}
 	log.Println("Server exiting")
 }
+
+var secrets = gin.H{
+	"foo":    gin.H{"email": "foo@bar.com", "phone": "123456"},
+	"austin": gin.H{"email": "austin@austin.com", "phone": "22222"},
+	"lena":   gin.H{"email": "lena@lena.com", "phone": "33333"},
+}
+
+/*
+BasicAuth
+BasicAuth中间件
+*/
+func BasicAuth() {
+	r := gin.Default()
+	// 路由组使用gin.BasicAuth中间件
+	// gin.Accounts是map[string]string的一种快捷方式
+	authrorized := r.Group("/admin", gin.BasicAuth(gin.Accounts{
+		"foo":    "bar",
+		"austin": "1234",
+		"lena":   "hello2",
+		"manu":   "4321",
+	}))
+	// /admin/secrets端点
+	authrorized.GET("/secrets", func(c *gin.Context) {
+		user := c.MustGet(gin.AuthUserKey).(string)
+		if secret, ok := secrets[user]; ok {
+			c.JSON(http.StatusOK, gin.H{"user": user, "secret": secret})
+		} else {
+			c.JSON(http.StatusOK, gin.H{"user": user, "secret": "no secret"})
+		}
+	})
+	r.Run(":8080")
+}
