@@ -4,9 +4,11 @@ import (
 	"context"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
 	"github.com/gin-gonic/gin/testdata/protoexample"
 	"golang.org/x/net/http2"
 	"html/template"
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -387,4 +389,202 @@ func BasicAuth() {
 		}
 	})
 	r.Run(":8080")
+}
+
+/*
+HttpFunc
+使用http方法
+*/
+func HttpFunc() {
+	// 使用默认中间件（logger和recovery中间件）创建gin路由
+	router := gin.Default()
+
+	router.GET("")
+	router.POST("")
+	router.PUT("")
+	router.DELETE("")
+	router.PATCH("")
+	router.HEAD("")
+	router.OPTIONS("")
+
+	router.Run()
+}
+
+/*
+Middleware
+使用中间件
+*/
+func Middleware() {
+	// 新建一个没有任何默认中间件的路由
+	r := gin.New()
+
+	// 全局中间件
+	// Logger 中间件将日志写入gin.DefaultWriter, 即使将GIN_HOME设置为release，
+	// By Default gin.DefaultWriter = os.Stdout
+	r.Use(gin.Logger())
+
+	// Recovery 中间件会recover任何panic，如果有panic的话，会写入500
+	r.Use(gin.Recovery())
+
+	// 你可以为每个路由添加任意数量的中间件
+	r.GET("/benchmark", gin.Logger())
+
+	// 认证路由组
+	// authorized := r.Group("/", AuthRequired())
+	// 和使用以下两行代码的效果完全一样
+	// authorized := r.Group("/")
+	// 路由组中间件 在此例中，我们在“authorized”路由组中使用自定义创建的AuthRequired()中间件
+	/*authorized.Use(AuthRequired())
+	{
+		authorized.POST("/login", loginEndpoint)
+		authorized.POST("/submit", submitEndpoint)
+		authorized.POST("/read", readEndpoint)
+		// 嵌套路由组
+		testing := authorized.Group("testing")
+		testing.GET("/analytics", analyticsEndpoint)
+	}*/
+
+	r.Run()
+}
+
+type Person struct {
+	Name    string `form:"name"`
+	Address string `form:"address"`
+}
+
+/*
+BindingURLParam
+只绑定url查询字符串
+ShouldBindQuery函数只绑定url查询参数而忽略post数据
+*/
+func BindingURLParam() {
+	router := gin.Default()
+	router.Any("/testing", bindUrlParam)
+	router.Run()
+}
+
+func bindUrlParam(c *gin.Context) {
+	var person Person
+	if c.ShouldBindQuery(&person) == nil {
+		log.Println("Only Bind By Query string")
+		log.Println(person.Name)
+		log.Println(person.Address)
+	}
+	c.String(200, "success")
+}
+
+/*
+GoroutineInMiddleWare
+在中间件中使用goroutine
+当在中间件或handler中启动新的goroutine时，不能使用原始的上下文，必须使用只读副本
+*/
+func GoroutineInMiddleWare() {
+	router := gin.Default()
+	router.GET("/long_async", func(c *gin.Context) {
+		// 创建在goroutine中使用的副本
+		c2 := c.Copy()
+		go func() {
+			// 用time.Sleep() 模拟一个长任务
+			time.Sleep(5 * time.Second)
+			// 请注意您使用的是复制的上下文c2, 这一点很重要
+			log.Println("Done! in path " + c2.Request.URL.Path)
+		}()
+	})
+	router.GET("/long_sync", func(c *gin.Context) {
+		// 用time.Sleep模拟一个长任务
+		time.Sleep(5 * time.Second)
+		// 因为没有使用goroutine，不需要copy上下文
+		log.Println("Done! in path " + c.Request.URL.Path)
+	})
+	router.Run()
+}
+
+/*
+LogPrint
+记录日志
+*/
+func LogPrint() {
+	// 禁用控制台颜色，将日志写入文件时不需要控制台颜色
+	gin.DisableConsoleColor()
+	// 记录到文件
+	file, _ := os.Create("/data/gin.log")
+	gin.DefaultWriter = io.MultiWriter(file)
+	// 如果需要同时将日志写入文件和控制台，请使用以下代码
+	//gin.DefaultWriter = io.MultiWriter(file, os.Stdout)
+	router := gin.Default()
+	router.GET("/ping", func(c *gin.Context) {
+		c.String(http.StatusOK, "pong")
+	})
+	router.Run()
+}
+
+/*
+LogFormat
+定义路由日志的格式
+*/
+func LogFormat() {
+	router := gin.Default()
+	gin.DebugPrintRouteFunc = func(httpMethod, absolutePath, handlerName string, nuHandlers int) {
+		log.Printf("endpoint %v %v %v %v\n", httpMethod, absolutePath, handlerName, nuHandlers)
+	}
+
+	router.POST("/foo", func(c *gin.Context) {
+		c.JSON(http.StatusOK, "foo")
+	})
+
+	router.GET("/bar", func(c *gin.Context) {
+		c.JSON(http.StatusOK, "bar")
+	})
+
+	router.GET("/status", func(c *gin.Context) {
+		c.JSON(http.StatusOK, "ok")
+	})
+
+	router.Run()
+}
+
+type formA struct {
+	Foo string `json:"foo" xml:"foo" binding:"required"`
+}
+
+type formB struct {
+	Bar string `json:"bar" xml:"bar" binding:"required"`
+}
+
+func RequestBody() {
+	router := gin.Default()
+	router.POST("/requestBody", RequestBodyHandler)
+	router.POST("/requestBody2", RequestBodyHandlerMuti)
+	router.Run()
+}
+
+/*
+RequestBodyHandler
+一般通过调用c.Request.Body方法绑定数据，但不能多次调用这个方法
+*/
+func RequestBodyHandler(c *gin.Context) {
+	a := formA{}
+	b := formB{}
+	// c.ShouldBind 使用了c.Request.Body 不可重用
+	if errA := c.ShouldBind(&a); errA == nil {
+		c.String(http.StatusOK, "the body should be formA")
+		// 现在c.Request.Body 是EOF, 所以这里会报错
+	} else if errB := c.ShouldBind(&b); errB == nil {
+		c.String(http.StatusOK, "the body should be formB")
+	}
+}
+
+/*
+RequestBodyHandlerMuti
+要想多次绑定，可以使用c.ShouldBindBodyWith
+*/
+func RequestBodyHandlerMuti(c *gin.Context) {
+	a := formA{}
+	b := formB{}
+	// 读取c.Request.Body并将结果存入上下文
+	if errA := c.ShouldBindBodyWith(&a, binding.JSON); errA == nil {
+		c.String(http.StatusOK, `the body should be formA`)
+	} else if errB := c.ShouldBindBodyWith(&b, binding.JSON); errB == nil {
+		c.String(http.StatusOK, `the body should be formB`)
+	}
 }
