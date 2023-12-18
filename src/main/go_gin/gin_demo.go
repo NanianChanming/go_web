@@ -3,6 +3,7 @@ package go_gin
 import (
 	"context"
 	"fmt"
+	"github.com/gin-gonic/autotls"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/gin-gonic/gin/testdata/protoexample"
@@ -587,4 +588,51 @@ func RequestBodyHandlerMuti(c *gin.Context) {
 	} else if errB := c.ShouldBindBodyWith(&b, binding.JSON); errB == nil {
 		c.String(http.StatusOK, `the body should be formB`)
 	}
+}
+
+/*
+LogColor
+控制日志输出颜色
+*/
+func LogColor() {
+	// 禁止日志颜色
+	//gin.DisableConsoleColor()
+
+	// 强制日志颜色化
+	gin.ForceConsoleColor()
+
+	// 用默认中间件创建一个gin路由
+	// 日志和恢复中间件
+	router := gin.Default()
+	router.GET("/logColor", func(c *gin.Context) {
+		c.String(http.StatusOK, "success")
+	})
+	router.Run()
+}
+
+/*
+LetsEncrypt
+一行代码支持letsEncrypt https servers 实例
+*/
+func LetsEncrypt() {
+	router := gin.Default()
+	// ping handler
+	router.GET("/letsEncrypt", func(c *gin.Context) {
+		c.String(http.StatusOK, "success")
+	})
+	log.Fatal(autotls.Run(router, "example1.com", "example2.com"))
+}
+
+/*
+UrlParam
+映射查询字符串或表单参数
+*/
+func UrlParam() {
+	router := gin.Default()
+	router.POST("/postParam", func(c *gin.Context) {
+		ids := c.QueryMap("ids")
+		names := c.PostFormMap("names")
+		log.Printf("ids: %v， names: %v", ids, names)
+	})
+	router.Run()
 }
