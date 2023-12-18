@@ -636,3 +636,19 @@ func UrlParam() {
 	})
 	router.Run()
 }
+
+/*
+QueryParam
+查询字符串参数
+*/
+func QueryParam() {
+	router := gin.Default()
+	// 使用现有的基础请求对象解析查询字符串参数
+	// 示例url: /welcome?firstname=Jane&lastname=Doe
+	router.GET("/welcome", func(c *gin.Context) {
+		firstName := c.DefaultQuery("firstname", "Guanyu")
+		lastName := c.Query("lastname")
+		c.String(http.StatusOK, "Hello %s %s", firstName, lastName)
+	})
+	router.Run()
+}
