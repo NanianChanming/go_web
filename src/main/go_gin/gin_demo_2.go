@@ -2,7 +2,9 @@ package go_gin
 
 import (
 	"github.com/gin-gonic/gin"
+	"log"
 	"net/http"
+	"time"
 )
 
 /*
@@ -57,6 +59,135 @@ func LoginInfoBind() {
 			return
 		}
 		context.JSON(http.StatusOK, gin.H{"status": "you are logged in"})
+	})
+	router.Run()
+}
+
+type Person2 struct {
+	Name     string `form:"name"`
+	Address  string `form:"address"`
+	Birthday string `form:"birthday" time_format:"2006-01-02" time_utc:"1"`
+}
+
+func StartPage() {
+	router := gin.Default()
+	var person Person2
+	// 如果是get请求，只使用Form绑定引擎（`query`）
+	// 如果是post请求，首先检查`content-type`是否为json或者xml,然后再使用form(form-data)
+	router.Any("/bindPerson", func(context *gin.Context) {
+		if context.ShouldBind(&person) == nil {
+			log.Println(person.Name)
+			log.Println(person.Address)
+			log.Println(person.Birthday)
+		}
+		context.String(http.StatusOK, "Success")
+	})
+	router.Run()
+}
+
+/*
+绑定表单数据到自定义结构体
+*/
+
+type StructA struct {
+	FieldA string `form:"field_a"`
+}
+
+type StructB struct {
+	NestedStruct StructA
+	FieldB       string `form:"field_b"`
+}
+
+type StructC struct {
+	NestedStructPointer *StructA
+	FieldC              string `form:"field_c"`
+}
+
+type StructD struct {
+	NestedAnonyStruct struct {
+		FieldX string `form:"field_x"`
+	}
+	FieldD string `form:"field_d"`
+}
+
+func GetDataB(context *gin.Context) {
+	var b StructB
+	context.Bind(&b)
+	context.JSON(http.StatusOK, gin.H{
+		"a": b.NestedStruct,
+		"b": b.FieldB,
+	})
+}
+
+func GetDataC(context *gin.Context) {
+	var b StructC
+	context.Bind(&b)
+	context.JSON(http.StatusOK, gin.H{
+		"a": b.NestedStructPointer,
+		"c": b.FieldC,
+	})
+}
+
+func GetDataD(context *gin.Context) {
+	var b StructD
+	context.Bind(&b)
+	context.JSON(http.StatusOK, gin.H{
+		"a": b.NestedAnonyStruct,
+		"b": b.FieldD,
+	})
+}
+
+func GetData() {
+	router := gin.Default()
+	router.GET("/getb", GetDataB)
+	router.GET("/getc", GetDataC)
+	router.GET("/getd", GetDataD)
+	router.Run()
+}
+
+/*
+自定义http配置
+customHttpConfig
+*/
+func customHttpConfig() {
+	router := gin.Default()
+	s := &http.Server{
+		Addr:           ":8080",
+		Handler:        router,
+		ReadTimeout:    10 * time.Second,
+		WriteTimeout:   10 * time.Second,
+		MaxHeaderBytes: 1 << 20,
+	}
+	s.ListenAndServe()
+}
+
+// Logger
+func Logger() gin.HandlerFunc {
+	return func(context *gin.Context) {
+		t := time.Now()
+		// 设置example变量
+		context.Set("example", "12345")
+		// 请求前
+		context.Next()
+		// 请求后
+		latency := time.Since(t)
+		log.Print(latency)
+		// 获取发送的status
+		status := context.Writer.Status()
+		log.Println(status)
+	}
+}
+
+/*
+CustomMiddleware
+自定义中间件
+*/
+func CustomMiddleware() {
+	router := gin.New()
+	router.Use(Logger())
+	router.GET("/custom", func(context *gin.Context) {
+		example := context.MustGet("example").(string)
+		log.Println(example)
 	})
 	router.Run()
 }
