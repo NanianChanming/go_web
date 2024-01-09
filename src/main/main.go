@@ -2,10 +2,10 @@ package main
 
 import (
 	_ "go_web/src/main/deploy"
-	"go_web/src/main/gin"
 	_ "go_web/src/main/go_excel"
+	"go_web/src/main/go_gin"
 )
 
 func main() {
-	gin.InitGin()
+	go_gin.MutiServer()
 }
